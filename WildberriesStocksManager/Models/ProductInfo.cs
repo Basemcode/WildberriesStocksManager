@@ -9,7 +9,6 @@ namespace WildberriesStocksManager.Models;
 public class ProductInfo
 {
     public int NmID { get; set; }
-    public bool IsDeleted { get; set; }
     public string SubjectName { get; set; }
     public string Name { get; set; }
     public string VendorCode { get; set; }

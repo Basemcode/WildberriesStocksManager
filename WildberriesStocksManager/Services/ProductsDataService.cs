@@ -12,11 +12,26 @@ namespace WildberriesStocksManager.Services;
 
 internal static class ProductsDataService
 {
-    public static async Task<List<ProductInfo>> GetProductsInfos()
+    public static async Task<List<ProductInfo>> GetProductsInfos(Stores store, string stockType)
     {
+        //determine which products IDs to use bases on the store
+        int[] ProductsList;
+        switch (store)
+        {
+            case Stores.ArtXL:
+                ProductsList = ProductsDetails.ArtXLProductsList;
+                break;
+            case Stores.RusDecor:
+                ProductsList = ProductsDetails.RusDecorProductsList;
+                break;
+            default:
+                throw new ArgumentException("Bad store name!");
+        }
+
         var ProductsStocksJson = await APIService.GetStockReportAsync(
-            ProductsDetails.ArtXLProductsList,
-            Stores.ArtXL
+            ProductsList,
+            store,
+            stockType
         );
 
         if (ProductsStocksJson.IsSuccessStatusCode)
@@ -25,7 +40,7 @@ internal static class ProductsDataService
         }
         else 
         {
-            throw new Exception("Error connection getting data from Wildberries server!");
+            throw new Exception($"Error getting data from Wildberries server! | {ProductsStocksJson.Content} ");
         }
     }
 
@@ -39,7 +54,6 @@ internal static class ProductsDataService
             .Data.Items.Select(item => new ProductInfo
             {
                 NmID = item.NmID,
-                IsDeleted = item.IsDeleted,
                 SubjectName = item.SubjectName,
                 Name = item.Name,
                 VendorCode = item.VendorCode,

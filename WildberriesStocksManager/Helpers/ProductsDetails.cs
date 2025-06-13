@@ -8,9 +8,12 @@ namespace WildberriesStocksManager.Helpers;
 
 internal static class ProductsDetails
 {
-    //temporary products list that will be later requested by google sheets API
+    // temporary products list that will be later requested by google sheets API
     public static int[] ArtXLProductsList =
     {
+        424914699,
+        415284365,
+        415280317,
         149238512,
         171720984,
         357079025,

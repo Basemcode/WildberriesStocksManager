@@ -14,7 +14,6 @@ public class Metrics
 public class Item
 {
     public int NmID { get; set; }
-    public bool IsDeleted { get; set; }
     public string SubjectName { get; set; }
     public string Name { get; set; }
     public string VendorCode { get; set; }
