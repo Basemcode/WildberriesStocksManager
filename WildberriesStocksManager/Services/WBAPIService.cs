@@ -11,12 +11,12 @@ using WildberriesStocksManager.Enums;
 
 namespace WildberriesStocksManager.Services;
 
-internal class APIService
+internal class WBAPIService
 {
     public static async Task<RestResponse> GetStockReportAsync(int[] ProductsList,Stores store,string stockType)
     {
         var config = new ConfigurationBuilder()
-          .AddUserSecrets<APIService>()
+          .AddUserSecrets<WBAPIService>()
           .Build();
 
         //set the api token for the chosen store from the secrets.json file

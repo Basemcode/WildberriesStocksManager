@@ -28,15 +28,15 @@ internal static class ProductsDataService
                 throw new ArgumentException("Bad store name!");
         }
 
-        var ProductsStocksJson = await APIService.GetStockReportAsync(
+        var ProductsStocksJson = await WBAPIService.GetStockReportAsync(
             ProductsList,
             store,
             stockType
         );
 
-        if (ProductsStocksJson.IsSuccessStatusCode)
+        if (ProductsStocksJson.IsSuccessStatusCode && ProductsStocksJson.Content is not null)
         {
-            return await ParseProductInfoAsync(ProductsStocksJson.Content);
+            return ParseProductInfo(ProductsStocksJson.Content);
         }
         else 
         {
@@ -44,7 +44,8 @@ internal static class ProductsDataService
         }
     }
 
-    public static async Task<List<ProductInfo>> ParseProductInfoAsync(string json)
+    //convert the json response from WB API to a list of ProductInfo objects
+    public static List<ProductInfo> ParseProductInfo(string json)
     {
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
