@@ -15,8 +15,9 @@ internal static class ProductsDataService
     public static async Task<List<ProductInfo>> GetProductsInfos(Stores store, string stockType)
     {
         //determine which products IDs to use bases on the store
-        int[] ProductsList;
-        switch (store)
+        ProductToCheck[] ProductsList;
+        ProductsList =await GoogleSheetsAPIService.GetTargetedProductsList(store);
+        /*switch (store)
         {
             case Stores.ArtXL:
                 ProductsList = ProductsDetails.ArtXLProductsList;
@@ -26,10 +27,11 @@ internal static class ProductsDataService
                 break;
             default:
                 throw new ArgumentException("Bad store name!");
-        }
+        }*/
 
+        int[] listOfIds = ProductsList.Select(p => Convert.ToInt32(p.NmID)).ToArray();
         var ProductsStocksJson = await WBAPIService.GetStockReportAsync(
-            ProductsList,
+            listOfIds,
             store,
             stockType
         );

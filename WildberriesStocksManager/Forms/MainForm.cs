@@ -13,7 +13,7 @@ public partial class MainForm : Form
 
     private async void btnGetData_Click(object sender, EventArgs e)
     {
-        var productsInfoList = await ProductsDataService.GetProductsInfos(Stores.RusDecor,StockTypes.FBS);  
+        var productsInfoList = await ProductsDataService.GetProductsInfos(Stores.ArtXL,StockTypes.FBS);  
         dgvProductsInfo.DataSource = productsInfoList;
     }
 }
