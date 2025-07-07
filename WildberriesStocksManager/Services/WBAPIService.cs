@@ -1,12 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using RestSharp;
-using System.Text.Json;
-using System.Net.Http;
-using System.Threading.Tasks;
-
-using WildberriesStocksManager.Helpers;
 using WildberriesStocksManager.Enums;
 
 namespace WildberriesStocksManager.Services;

@@ -30,6 +30,7 @@
         {
             btnGetData = new Button();
             dgvProductsInfo = new DataGridView();
+            cbStore = new ComboBox();
             ((System.ComponentModel.ISupportInitialize)dgvProductsInfo).BeginInit();
             SuspendLayout();
             // 
@@ -54,11 +55,22 @@
             dgvProductsInfo.Size = new Size(1277, 339);
             dgvProductsInfo.TabIndex = 1;
             // 
+            // cbStore
+            // 
+            cbStore.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbStore.FormattingEnabled = true;
+            cbStore.Items.AddRange(new object[] { "ArtXL", "RusDecor" });
+            cbStore.Location = new Point(133, 388);
+            cbStore.Name = "cbStore";
+            cbStore.Size = new Size(151, 28);
+            cbStore.TabIndex = 2;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1293, 450);
+            Controls.Add(cbStore);
             Controls.Add(dgvProductsInfo);
             Controls.Add(btnGetData);
             Name = "MainForm";
@@ -71,5 +83,6 @@
 
         private Button btnGetData;
         private DataGridView dgvProductsInfo;
+        private ComboBox cbStore;
     }
 }

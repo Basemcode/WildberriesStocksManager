@@ -13,7 +13,23 @@ public partial class MainForm : Form
 
     private async void btnGetData_Click(object sender, EventArgs e)
     {
-        var productsInfoList = await ProductsDataService.GetProductsInfos(Stores.ArtXL,StockTypes.FBO);  
-        dgvProductsInfo.DataSource = productsInfoList;
+        try
+        {
+            var store = cbStore.SelectedItem switch
+            {
+                "ArtXL" => Stores.ArtXL,
+                "RusDecor" => Stores.RusDecor,
+                _ => throw new ArgumentException("Invalid store selected")
+            };
+
+            var productsInfoList = await ProductsDataService.GetProductsInfos(store, StockTypes.FBO);
+
+            dgvProductsInfo.DataSource = productsInfoList;
+        }
+        catch (Exception ee)
+        {
+            MessageBox.Show(ee.Message);
+        }
+        
     }
 }

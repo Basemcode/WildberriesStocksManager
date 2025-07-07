@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,22 +12,11 @@ namespace WildberriesStocksManager.Services;
 
 internal static class ProductsDataService
 {
-    public static async Task<List<ProductInfo>> GetProductsInfos(Stores store, string stockType)
+    public static async Task<List<ProductInfo>?> GetProductsInfos(Stores store, string stockType)
     {
         //determine which products IDs to use bases on the store
         ProductToCheck[] ProductsList;
-        ProductsList =await GoogleSheetsAPIService.GetTargetedProductsList(store);
-        /*switch (store)
-        {
-            case Stores.ArtXL:
-                ProductsList = ProductsDetails.ArtXLProductsList;
-                break;
-            case Stores.RusDecor:
-                ProductsList = ProductsDetails.RusDecorProductsList;
-                break;
-            default:
-                throw new ArgumentException("Bad store name!");
-        }*/
+        ProductsList =await GoogleSheetsAPIService.GetTargetedProductsListAsync(store);
 
         var ProductsStocksJson = await WBAPIService.GetStockReportAsync(
             store,
@@ -45,13 +34,13 @@ internal static class ProductsDataService
     }
 
     //convert the json response from WB API to a list of ProductInfo objects
-    public static List<ProductInfo> ParseProductInfo(string json)
+    public static List<ProductInfo>? ParseProductInfo(string json)
     {
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
         var response = JsonSerializer.Deserialize<ApiResponse>(json, options);
 
-        var products = response
+        var products = response?
             .Data.Items.Select(item => new ProductInfo
             {
                 NmID = item.NmID,
