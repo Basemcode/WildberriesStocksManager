@@ -29,9 +29,7 @@ internal static class ProductsDataService
                 throw new ArgumentException("Bad store name!");
         }*/
 
-        int[] listOfIds = ProductsList.Select(p => Convert.ToInt32(p.NmID)).ToArray();
         var ProductsStocksJson = await WBAPIService.GetStockReportAsync(
-            listOfIds,
             store,
             stockType
         );

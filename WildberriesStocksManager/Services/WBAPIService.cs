@@ -13,7 +13,7 @@ namespace WildberriesStocksManager.Services;
 
 internal class WBAPIService
 {
-    public static async Task<RestResponse> GetStockReportAsync(int[] ProductsList,Stores store,string stockType)
+    public static async Task<RestResponse> GetStockReportAsync(Stores store,string stockType)
     {
         var config = new ConfigurationBuilder()
           .AddUserSecrets<WBAPIService>()
@@ -48,7 +48,6 @@ internal class WBAPIService
 
         var requestBody = new
         {
-            nmIDs = ProductsList,
             currentPeriod = new
             {
                 start = today,
