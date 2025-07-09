@@ -1,13 +1,12 @@
+using System.Reflection;
+using System.Text.Json;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Microsoft.Extensions.Configuration;
-using System.Reflection;
-using System.Text.Json;
 using WildberriesStocksManager.Enums;
 using WildberriesStocksManager.Models;
-
 
 namespace WildberriesStocksManager.Services;
 
@@ -29,10 +28,13 @@ internal class GoogleSheetsAPIService
 
         GoogleCredential credential;
 
-
         // Construct the JSON string for the Google credentials section in user secrets
-        var googleCredentialsJson = JsonSerializer.Serialize(config.GetSection("GoogleCredentials").GetChildren()
-            .ToDictionary(item => item.Key, item => item.Value));
+        var googleCredentialsJson = JsonSerializer.Serialize(
+            config
+                .GetSection("GoogleCredentials")
+                .GetChildren()
+                .ToDictionary(item => item.Key, item => item.Value)
+        );
 
         // Load the JSON string into a GoogleCredential object
         credential = GoogleCredential.FromJson(googleCredentialsJson).CreateScoped(_scopes);
@@ -40,13 +42,15 @@ internal class GoogleSheetsAPIService
         //load settings from the appsettings.json file
         var ApplicationName = config["Google:ApplicationName"];
         var SpreadsheetId = config["Google:SpreadsheetId"];
-        
+
         // Create Google Sheets API service.
-        _service = new SheetsService(new BaseClientService.Initializer()
-        {
-            HttpClientInitializer = credential,
-            ApplicationName = ApplicationName,
-        });
+        _service = new SheetsService(
+            new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = ApplicationName,
+            }
+        );
 
         IList<IList<object>>? range;
 
@@ -57,7 +61,7 @@ internal class GoogleSheetsAPIService
                 range = await GetDataFromGoogleAPIAsync("ArtXL", SpreadsheetId);
                 break;
             case Stores.RusDecor:
-                range =await GetDataFromGoogleAPIAsync("RusDecor", SpreadsheetId);
+                range = await GetDataFromGoogleAPIAsync("RusDecor", SpreadsheetId);
                 break;
             default:
                 throw new ArgumentException("Bad store name!");
@@ -67,10 +71,13 @@ internal class GoogleSheetsAPIService
         return arrayOfProducts;
     }
 
-    private static async Task<IList<IList<object>>?> GetDataFromGoogleAPIAsync(string sheet,string spreadsheetId)
+    private static async Task<IList<IList<object>>?> GetDataFromGoogleAPIAsync(
+        string sheet,
+        string spreadsheetId
+    )
     {
         // Fetch the sheet data
-        string range = $"{sheet}!A:C"; 
+        string range = $"{sheet}!A:C";
         var request = _service?.Spreadsheets.Values.Get(spreadsheetId, range);
 
         ValueRange response = await request.ExecuteAsync();
@@ -83,9 +90,8 @@ internal class GoogleSheetsAPIService
         else
         {
             Console.WriteLine("No data found.");
-            return null;  
+            return null;
         }
-
     }
 
     public static ProductToCheck[] ConvertToProductArray(IList<IList<object>>? input)
@@ -97,7 +103,7 @@ internal class GoogleSheetsAPIService
         // List to hold the converted ProductToCheck objects
         List<ProductToCheck> productList = new List<ProductToCheck>();
 
-        //get the headers order 
+        //get the headers order
         var headers = input[0];
         int NmIDIndex = headers.IndexOf("Артикул WB");
         int MinimumFBOStockLevelIndex = headers.IndexOf("Минимальный Остаток FBO");
@@ -107,16 +113,47 @@ internal class GoogleSheetsAPIService
         for (int i = 1; i < input.Count; i++)
         {
             var item = input[i];
-         
-            var product = new ProductToCheck
+
+            var product = new ProductToCheck();
+
+            // Convert NmID object to string
+            if (NmIDIndex < item.Count)
             {
-                NmID = item[NmIDIndex]?.ToString() ?? string.Empty, // Convert first item to string (NmID)
-                MinimumFBOStockLevel = Convert.ToInt32(item[MinimumFBOStockLevelIndex]), // Convert second item to int (MinimumFBOStockLevel)
-                StockValueForFBS = Convert.ToInt32(item[StockValueForFBSIndex]) // Convert third item to int (StockValueForFBS)
-            };
+                product.NmID = item[NmIDIndex]?.ToString() ?? string.Empty;
+            }
+
+            // Convert MinimumFBOStockLevel int
+            if (
+                MinimumFBOStockLevelIndex < item.Count
+            )
+            {
+                try
+                {
+                    product.MinimumFBOStockLevel = Convert.ToInt32(item[MinimumFBOStockLevelIndex]);
+                }
+                catch (Exception error)
+                {
+                    product.MinimumFBOStockLevel = 0;
+                    Console.WriteLine($"Can't parse data from googlesheets in value MinimumFBOStockLevel! {error.Message}");
+                }
+                
+            }
+
+            // Convert StockValueForFBS
+            if (StockValueForFBSIndex < item.Count)
+            {
+                try
+                {
+                    product.StockValueForFBS = Convert.ToInt32(item[StockValueForFBSIndex]);
+                }
+                catch (Exception error)
+                {
+                    product.StockValueForFBS = 0;
+                    Console.WriteLine($"Can't parse data from googlesheets in value StockValueForFBS! {error.Message}");
+                }
+            }
 
             productList.Add(product);
-         
         }
 
         //convert list to array and return

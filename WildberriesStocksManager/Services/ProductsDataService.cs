@@ -16,21 +16,49 @@ internal static class ProductsDataService
     {
         //determine which products IDs to use bases on the store
         ProductToCheck[] ProductsList;
-        ProductsList =await GoogleSheetsAPIService.GetTargetedProductsListAsync(store);
+        ProductsList = await GoogleSheetsAPIService.GetTargetedProductsListAsync(store);
 
-        var ProductsStocksJson = await WBAPIService.GetStockReportAsync(
-            store,
-            stockType
-        );
+        List<ProductInfo>? allProductsInfosList = new();
+        bool allReturned = false;
+        int pageOffset = 0;
 
-        if (ProductsStocksJson.IsSuccessStatusCode && ProductsStocksJson.Content is not null)
+        while (!allReturned)
         {
-            return ParseProductInfo(ProductsStocksJson.Content);
+            // call the API to receive info about the products from wildberries
+            var ProductsStocksJson = await WBAPIService.GetStockReportAsync(
+                store,
+                stockType,
+                pageOffset
+            );
+
+            // check if the response is valid
+            if (ProductsStocksJson.IsSuccessStatusCode && ProductsStocksJson.Content is not null)
+            {
+                var returnedList = ParseProductInfo(ProductsStocksJson.Content);
+                if (returnedList != null)
+                {
+                    // add the returned part of data to final list
+                    allProductsInfosList.AddRange(returnedList);
+                    //check if all the data returned
+                    if (returnedList.Count < 1000) //the 1000 is the maximum amount of products info that the api can return
+                    {
+                        allReturned = true;
+                    }
+                    else
+                    {
+                        pageOffset += 1000;
+                    } 
+                }
+            }
+            else
+            {
+                throw new Exception(
+                    $"Error getting data from Wildberries server! | {ProductsStocksJson.Content} "
+                );
+                
+            } 
         }
-        else 
-        {
-            throw new Exception($"Error getting data from Wildberries server! | {ProductsStocksJson.Content} ");
-        }
+        return allProductsInfosList;
     }
 
     //convert the json response from WB API to a list of ProductInfo objects
@@ -40,8 +68,8 @@ internal static class ProductsDataService
 
         var response = JsonSerializer.Deserialize<ApiResponse>(json, options);
 
-        var products = response?
-            .Data.Items.Select(item => new ProductInfo
+        var products = response
+            ?.Data.Items.Select(item => new ProductInfo
             {
                 NmID = item.NmID,
                 SubjectName = item.SubjectName,

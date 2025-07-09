@@ -6,14 +6,12 @@ namespace WildberriesStocksManager.Services;
 
 internal class WBAPIService
 {
-    public static async Task<RestResponse> GetStockReportAsync(Stores store,string stockType)
+    public static async Task<RestResponse> GetStockReportAsync(Stores store, string stockType , int offset)
     {
-        var config = new ConfigurationBuilder()
-          .AddUserSecrets<WBAPIService>()
-          .Build();
+        var config = new ConfigurationBuilder().AddUserSecrets<WBAPIService>().Build();
 
         //set the api token for the chosen store from the secrets.json file
-        var ApiToken=string.Empty;
+        var ApiToken = string.Empty;
         switch (store)
         {
             case Stores.ArtXL:
@@ -25,11 +23,10 @@ internal class WBAPIService
             default:
                 throw new ArgumentException("Invalid store Argument in GetStockReportAsync()");
         }
-        
 
         var options = new RestClientOptions("https://seller-analytics-api.wildberries.ru")
         {
-            Timeout = TimeSpan.FromSeconds(60)
+            Timeout = TimeSpan.FromSeconds(60),
         };
         var client = new RestClient(options);
 
@@ -38,32 +35,31 @@ internal class WBAPIService
         request.AddHeader("Authorization", $"Bearer {ApiToken}");
 
         string today = DateTime.Today.ToString("yyyy-MM-dd");
+        string weekAgo = (DateTime.Today - TimeSpan.FromDays(15)).ToString("yyyy-MM-dd");
 
         var requestBody = new
         {
-            currentPeriod = new
-            {
-                start = today,
-                end = today
-            },
-            stockType = stockType,
+            currentPeriod = new { start = weekAgo, end = today },
+            stockType,
             skipDeletedNm = true,
-            orderBy = new
+            orderBy = new { field = "avgOrders", mode = "asc" },
+            availabilityFilters = new[]
             {
-                field = "avgOrders",
-                mode = "asc"
+                "deficient",
+                "actual",
+                "balanced",
+                "nonActual",
+                "nonLiquid",
+                "invalidData",
             },
-            availabilityFilters = new[] {
-                "deficient", "actual", "balanced", "nonActual", "nonLiquid", "invalidData"
-            },
-            limit=1000,
-            offset = 0
+            limit = 1000,
+            offset
         };
 
         request.AddJsonBody(requestBody);
 
         RestResponse response = await client.ExecuteAsync(request);
 
-       return response;
+        return response;
     }
 }

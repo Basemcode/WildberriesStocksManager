@@ -13,8 +13,8 @@ public partial class MainForm : Form
 
     private async void btnGetData_Click(object sender, EventArgs e)
     {
-        try
-        {
+        /*try
+        {*/
             var store = cbStore.SelectedItem switch
             {
                 "ArtXL" => Stores.ArtXL,
@@ -25,11 +25,11 @@ public partial class MainForm : Form
             var productsInfoList = await ProductsDataService.GetProductsInfos(store, StockTypes.FBO);
 
             dgvProductsInfo.DataSource = productsInfoList;
-        }
+        /*}
         catch (Exception ee)
         {
             MessageBox.Show(ee.Message);
-        }
+        }*/
         
     }
 }
