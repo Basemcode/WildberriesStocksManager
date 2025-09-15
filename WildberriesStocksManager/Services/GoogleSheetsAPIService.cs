@@ -80,18 +80,29 @@ internal class GoogleSheetsAPIService
         string range = $"{sheet}!A:C";
         var request = _service?.Spreadsheets.Values.Get(spreadsheetId, range);
 
-        ValueRange response = await request.ExecuteAsync();
-        IList<IList<object>> values = response.Values;
-
-        if (values is not null)
+        try
         {
-            return values;
+            ValueRange response = await request.ExecuteAsync();
+            IList<IList<object>> values = response.Values;
+            if (values is not null)
+            {
+                return values;
+            }
+            else
+            {
+                Console.WriteLine("No data found.");
+                return null;
+            }
         }
-        else
+        catch (Exception error)
         {
-            Console.WriteLine("No data found.");
+            Console.WriteLine($"can't get info from server! {error.Message}");
             return null;
         }
+        
+        
+
+        
     }
 
     public static ProductToCheck[] ConvertToProductArray(IList<IList<object>>? input)
@@ -114,12 +125,36 @@ internal class GoogleSheetsAPIService
         {
             var item = input[i];
 
-            var product = new ProductToCheck();
+            ProductToCheck product;
 
-            // Convert NmID object to string
+            // performe all the neccesarry checks of the id field then convert it (NmID object) to string
             if (NmIDIndex < item.Count)
             {
-                product.NmID = item[NmIDIndex]?.ToString() ?? string.Empty;
+                // ToDo : refactor this checking code by invert the logic so it will be shorter  (if > or null or empty => continue)  
+                if (item[NmIDIndex] is not null)
+                {
+                    var nmid = item[NmIDIndex].ToString();
+                    if (string.IsNullOrEmpty(nmid))
+                    {
+                        Console.WriteLine("NmID is empty, skipping this item.");
+                        continue; // Skip this item if NmID is empty
+                    }
+                    else
+                    {
+                        product = new ProductToCheck()
+                        {
+                            NmID = nmid
+                        };
+                    }
+                }
+                else
+                {
+                    continue; // Skip this item if NmID is null
+                }
+            }
+            else
+            {
+                continue; // Skip this item if NmID is not found
             }
 
             // Convert MinimumFBOStockLevel int

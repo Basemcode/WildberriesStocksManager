@@ -8,7 +8,7 @@ namespace WildberriesStocksManager.Models
 {
     public class ProductToCheck
     {
-        public string NmID { get; set; } // Wildberries product ID (NmID)
+        public required string NmID { get; set; }  // Wildberries product ID (NmID)
         public int MinimumFBOStockLevel { get; set; } // Minimum stock level to check against
         public int StockValueForFBS { get; set; } // Stock value for FBS (Fulfillment by Seller) warehouse
     }

@@ -22,7 +22,7 @@ public partial class MainForm : Form
                 _ => throw new ArgumentException("Invalid store selected")
             };
 
-            var productsInfoList = await ProductsDataService.GetProductsInfos(store, StockTypes.FBO);
+            var productsInfoList = await ProductsDataService.GetProductsInfos(store);
 
             dgvProductsInfo.DataSource = productsInfoList;
         /*}
